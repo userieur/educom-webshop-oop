@@ -42,6 +42,10 @@
         return $formArray;
     }
 
+    function setHtmlTabs ($number) {
+        
+    }
+
 
     // BUSINESS
     function getAllProducts() {
@@ -231,7 +235,6 @@
     }
 
     // DATA
-
     function FindUserByEmail($email) {      
         $conn = connectDatabase('r_webshop');
         $sql = "SELECT * from users WHERE email = '" . $email . "'";
