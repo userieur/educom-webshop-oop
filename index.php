@@ -3,8 +3,12 @@
     require_once("Business/basics.php");
     session_start();
 
-    $data=NULL;
-    $page = getRequestedPage();
+    $data=array();
+    $data['page']= getRequestedPage();
+    
+    processRequest($data);
+    
+    
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $processed = processRequest($page);
         $page = $processed['page'];
@@ -14,7 +18,6 @@
         doLogoutUser();
         $page = 'home';
     }
-    $pageTitle = createTitle($page);
     showResponsePage($page, $pageTitle, $data);
 
 ?>

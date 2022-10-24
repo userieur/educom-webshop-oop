@@ -20,7 +20,7 @@
             echo'       
         <link rel="stylesheet" href="../Presentation/stylesheet.css">';
         }
-        private function bodyHeader() {
+        protected function bodyHeader() {
             echo"
         <h1>Basic</h1>";
         }

@@ -109,7 +109,7 @@
         return $output;
     }           
 
-    function matchRecord($value, $param=NULL) {
+    function matchPassword($value, $param=NULL) {
         $error = NULL;
         if (isUserLoggedIn() == false) {
             $email = cleanInput($_POST['email']);

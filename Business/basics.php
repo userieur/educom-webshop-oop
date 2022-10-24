@@ -1,5 +1,4 @@
 <?php
-
     function createOptions ($string) {
         $itemArray = explode("|", $string);
         $infoValue = array();
@@ -41,11 +40,6 @@
         }
         return $formArray;
     }
-
-    function setHtmlTabs ($number) {
-        
-    }
-
 
     // BUSINESS
     function getAllProducts() {
@@ -92,30 +86,28 @@
         return !empty($userInfo);
     }
 
-    function storeUser($userInfo) {
+    function storeUser($data) {
         $conn = connectDatabase('r_webshop');
-        $username = cleanSQLInput($conn, $userInfo['username']);
-        $password = cleanSQLInput($conn, $userInfo['password']);
-        $email = cleanSQLInput($conn, $userInfo['email']);
+        $input = $data['form'];
+        $username = cleanSQLInput($conn, $input['uname']['value']);
+        $password = cleanSQLInput($conn, $input['pword']['value']);
+        $email = cleanSQLInput($conn, $input['email']['value']);
         $sql = "INSERT INTO users (email, username, password) VALUES ('".$email."','".$username."','".$password."')";
         writeData($conn, $sql);
         mysqli_close($conn);
     }
 
-    function updatePassword($userInfo) {
+    function updatePassword($data) {
         $conn = connectDatabase('r_webshop');
-        $email = cleanSQLInput($conn, $userInfo['email']);
-        $password = cleanSQLInput($conn, $userInfo['password']);
+        $input = $data['form'];
+        $email = cleanSQLInput($conn, $input['email']['value']);
+        $password = cleanSQLInput($conn, $input['password']['value']);
         $sql = "UPDATE users SET password='".$password."' WHERE email='".$email."'";
         updateData($conn, $sql);
         mysqli_close($conn);
     }    
 
-    function currentDate () {
-        date_default_timezone_set('Europe/Amsterdam');
-        $date = date('Ymd');
-        return $date;
-    }
+
 
     function createInvoiceNumber() {
         $date = currentDate();
@@ -215,7 +207,8 @@
     }
 
     // SESSION MANAGER
-    function doLoginUser($userInfo) {
+    function doLoginUser($data) {
+        $userInfo = findUserByEmail($data['form']['email']['value']);
         $_SESSION['user'] = $userInfo['username'];
         $_SESSION['userId'] = $userInfo['id'];
         $_SESSION['email'] = $userInfo['email'];
@@ -235,7 +228,7 @@
     }
 
     // DATA
-    function FindUserByEmail($email) {      
+    function findUserByEmail($email) {      
         $conn = connectDatabase('r_webshop');
         $sql = "SELECT * from users WHERE email = '" . $email . "'";
         $output = readData($conn, $sql);
