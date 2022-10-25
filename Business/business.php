@@ -237,3 +237,5 @@
             unset($_SESSION['invoicelines']);
         }
     }
+
+    

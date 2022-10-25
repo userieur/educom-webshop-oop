@@ -43,11 +43,6 @@
         return $output;
     }
        
-    function doesEmailExist($email) {
-        $userInfo = findUserByEmail($email);
-        return !empty($userInfo);
-    }
-
     function storeUser($data) {
         $conn = connectDatabase();
         $input = $data['form'];
@@ -130,31 +125,7 @@
         mysqli_close($conn);
     }
 
-
-    // SESSION MANAGER
-    function doLoginUser($data) {
-        $userInfo = findUserByEmail($data['form']['email']['value']);
-        $_SESSION['user'] = $userInfo['username'];
-        $_SESSION['userId'] = $userInfo['id'];
-        $_SESSION['email'] = $userInfo['email'];
-        $_SESSION['cart'] = array();
-    }
-
-    function isUserLoggedIn() {
-        return isset($_SESSION['user']);
-    }
-
-    function getLoggedInUser() {
-        return $_SESSION('user');
-    }
-
-    function doLogoutUser() {
-        session_unset();
-    }
-
-
-    
-    // DATA
+   
     function findUserByEmail($email) {      
         $conn = connectDatabase();
         try { 
@@ -166,48 +137,3 @@
             mysqli_close($conn);        
         }
     }
-
-    function connectDatabase($dbname="r_webshop") {
-        $servername = "127.0.0.1";
-        $username = "r_webshop_usr";
-        $password = "Z6zFwtYvjGGq5Y";
-        $dbname = $dbname;
-
-        $conn = mysqli_connect($servername, $username, $password, $dbname);
-
-        if (!$conn) {
-            die("Connection failed: " . mysqli_connect_error());
-          }
-        return $conn;
-    }
-
-    function readData($conn, $sql) {
-        $output = array();
-        $result = mysqli_query($conn, $sql);
-
-        while($row = mysqli_fetch_assoc($result)) {
-            if (isset($row['id'])) {
-                $output[$row['id']] = $row;
-            } else {
-                $output[] = $row;
-            }
-        }
-        return $output;
-    }
-
-    function writeData($conn, $sql) {
-        if (!mysqli_query($conn, $sql)) {
-            echo "Error: " . $sql . "<br>" . mysqli_error($conn); // Exception
-        }
-    }
-
-    function updateData($conn, $sql) {
-        if (mysqli_query($conn, $sql)) {
-            // fffffffffffff
-          } else {
-            echo "Error: " . $sql . "<br>" . mysqli_error($conn);
-          }
-    }
-
-?>
-

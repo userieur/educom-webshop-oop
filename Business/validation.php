@@ -109,9 +109,9 @@
         return $output;
     }           
 
-    function matchPassword($value, $param=NULL) {
+    function authenticateUser($value, $param=NULL) {
         $error = NULL;
-        if (isUserLoggedIn() == false) {
+        if (!isUserLoggedIn()) {
             $email = cleanInput($_POST['email']);
         } else {
             $email = $_SESSION['email'];

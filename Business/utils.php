@@ -43,3 +43,8 @@
     function cleanSQLInput($conn, $value) {
         return mysqli_real_escape_string($conn, $value);
     }
+
+    function doesEmailExist($email) {
+        $userInfo = findUserByEmail($email);
+        return !empty($userInfo);
+    }
