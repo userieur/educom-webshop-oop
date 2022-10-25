@@ -39,3 +39,7 @@
         $date = date('Ymd');
         return $date;
     }
+    
+    function cleanSQLInput($conn, $value) {
+        return mysqli_real_escape_string($conn, $value);
+    }

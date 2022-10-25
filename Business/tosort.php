@@ -1,60 +1,22 @@
 <?php
-    function createOptions ($string) {
-        $itemArray = explode("|", $string);
-        $infoValue = array();
-        $index = 1;
-        while($index < count($itemArray)) {
-            $option = explode(":", $itemArray[$index]);
-            $infoValue += [$option[0] => $option[1]];
-            $index ++;
-        }
-        return ($infoValue);
-    }
+    require_once("constants.php");
 
-    function createChecks ($string) {
-        $itemArray = explode("|", $string);
-        $infoValue = array();
-        $index = 1;
-        while ($index < count($itemArray)) {
-            $infoValue[] = $itemArray[$index];
-            $index ++;
-        }
-        return ($infoValue);
-    }
-    
-    function buildFormArray ($array) {
-        $formArray = array('validForm' => false);
-        foreach($array as $key => $info) {
-            $formArray += [$key => array()];
-            foreach ($info as $item) {
-                $itemArray = explode("|", $item);
-                $infoType = $itemArray[0];
-                $infoValue = $itemArray[1];
-                if ($infoType == 'options') {
-                    $infoValue = createOptions($item);
-                } elseif ($infoType == 'checks') {
-                    $infoValue = createChecks($item);
-                }
-                $formArray[$key] += [$infoType => $infoValue];
-            }
-        }
-        return $formArray;
-    }
-
-    // BUSINESS
     function getAllProducts() {
-        $conn = connectDatabase('r_webshop');
-        $sql = $sql = "SELECT * from products";
-        $items = readData($conn, $sql);
-        mysqli_close($conn);
-        return $items;
+        $conn = connectDatabase();
+        try { 
+            $sql = $sql = "SELECT * from products";
+            $items = readData($conn, $sql);
+            return $items; 
+        }
+        finally {
+            mysqli_close($conn);    
+        }
     }
 
     function getProductsByIdArray($array) {
-        $conn = connectDatabase('r_webshop');
+        $conn = connectDatabase();
         $idString = "";
         $count = 0;
-        // var_dump($array);
         if ($array){
             foreach ($array as $id => $amount) {
                 if ((count($array)-$count) > 1) {
@@ -72,7 +34,7 @@
     }
 
     function getProductById($id) {
-        $conn = connectDatabase('r_webshop');
+        $conn = connectDatabase();
         $sql = "SELECT * from products WHERE id='".$id."'";
         $items = readData($conn, $sql);
         $values = array_values($items);
@@ -87,7 +49,7 @@
     }
 
     function storeUser($data) {
-        $conn = connectDatabase('r_webshop');
+        $conn = connectDatabase();
         $input = $data['form'];
         $username = cleanSQLInput($conn, $input['uname']['value']);
         $password = cleanSQLInput($conn, $input['pword']['value']);
@@ -98,7 +60,7 @@
     }
 
     function updatePassword($data) {
-        $conn = connectDatabase('r_webshop');
+        $conn = connectDatabase();
         $input = $data['form'];
         $email = cleanSQLInput($conn, $input['email']['value']);
         $password = cleanSQLInput($conn, $input['password']['value']);
@@ -107,11 +69,9 @@
         mysqli_close($conn);
     }    
 
-
-
     function createInvoiceNumber() {
         $date = currentDate();
-        $conn = connectDatabase('r_webshop');
+        $conn = connectDatabase();
         $sql = "SELECT invoice_num from invoices ORDER BY ID DESC LIMIT 1";
         $output = readData($conn, $sql);
         
@@ -132,7 +92,7 @@
     }
 
     function placeOrder() {
-        $conn = connectDatabase('r_webshop');
+        $conn = connectDatabase();
         $invoiceLines = $_SESSION['invoicelines'];
         $userId = $_SESSION['userId'];
         $invoiceNum = createInvoiceNumber();
@@ -170,41 +130,6 @@
         mysqli_close($conn);
     }
 
-    // CART STUFF
-    function addToCartForm($page, $name, $id) {
-        echo'
-        <form method="POST" action="index.php">
-        <input type="hidden" id="page" name="page" value="' . $page . '">
-        <input type="hidden" id="action" name="action" value="addToCart">
-        <input type="hidden" id="name" name="name" value="'.$name.'">
-        <input type="hidden" id="id" name="id" value="'.$id.'">
-        <input type="submit" value="Add">
-        </form>';
-    }
-
-    function removeFromCartForm($page, $name, $id) {
-        echo'
-        <form method="POST" action="index.php">
-        <input type="hidden" id="page" name="page" value="' . $page . '">
-        <input type="hidden" id="action" name="action" value="removeFromCart">
-        <input type="hidden" id="name" name="name" value="'.$name.'">
-        <input type="hidden" id="id" name="id" value="'.$id.'">
-        <input type="submit" value="Remove">
-        </form>';
-    }
-
-    function orderForm($page, $name, $id) {
-        echo'
-        <form method="POST" action="index.php">
-        <input type="hidden" id="page" name="page" value="' . $page . '">
-        <input type="hidden" id="action" name="action" value="order">
-        <input type="submit" value="Order">
-        </form>';
-    }
-
-    function cleanSQLInput($conn, $value) {
-        return mysqli_real_escape_string($conn, $value);
-    }
 
     // SESSION MANAGER
     function doLoginUser($data) {
@@ -227,20 +152,22 @@
         session_unset();
     }
 
+
+    
     // DATA
     function findUserByEmail($email) {      
-        $conn = connectDatabase('r_webshop');
-        $sql = "SELECT * from users WHERE email = '" . $email . "'";
-        $output = readData($conn, $sql);
-        // var_dump($output);
-        $values = array_values($output);
-        $id = $values[0]['id'];
-        mysqli_close($conn);
-        // VRAAG: Het voelt of deze functie slimmer kan.... Hoe?
-        return empty($output) ? NULL : $output[$id]; 
+        $conn = connectDatabase();
+        try { 
+            $sql = "SELECT * from users WHERE email = '" . $email . "'";
+            $output = readData($conn, $sql);
+            return empty($output) ? NULL : array_shift($output); 
+        }
+        finally {
+            mysqli_close($conn);        
+        }
     }
 
-    function connectDatabase($dbname) {
+    function connectDatabase($dbname="r_webshop") {
         $servername = "127.0.0.1";
         $username = "r_webshop_usr";
         $password = "Z6zFwtYvjGGq5Y";
@@ -258,24 +185,20 @@
         $output = array();
         $result = mysqli_query($conn, $sql);
 
-        if (mysqli_num_rows($result) > 0) {
-            while($row = mysqli_fetch_assoc($result)) {
-                if (isset($row['id'])) {
-                    $output[$row['id']] = $row;
-                } else {
+        while($row = mysqli_fetch_assoc($result)) {
+            if (isset($row['id'])) {
+                $output[$row['id']] = $row;
+            } else {
                 $output[] = $row;
-                }
             }
         }
         return $output;
     }
 
     function writeData($conn, $sql) {
-        if (mysqli_query($conn, $sql)) {
-            // fffffff
-          } else {
-            echo "Error: " . $sql . "<br>" . mysqli_error($conn);
-          }
+        if (!mysqli_query($conn, $sql)) {
+            echo "Error: " . $sql . "<br>" . mysqli_error($conn); // Exception
+        }
     }
 
     function updateData($conn, $sql) {
