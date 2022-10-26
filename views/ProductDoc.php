@@ -36,49 +36,6 @@
             echo '</div>';
         }
         
-        function showCart($page, $data) {
-            echo '<div class="container">';
-            $grandTotal = 0;
-            $_SESSION['invoicelines'] = [];
-            if ($data) {
-                foreach($data as $key => $info) {
-                    $id = $key;
-                    $name = $info['name'];
-                    $imageurl = $info['imageurl'];
-                    $price = $info['price'];
-                    $description = $info['description'];
-                    $count = $_SESSION['cart'][$name];
-                    $_SESSION['invoicelines'] += [$name => array()];
-                    $_SESSION['invoicelines'][$name] += ['sales_amount' => $count];
-                    $_SESSION['invoicelines'][$name] += ['sales_price' => $price];
-                    $_SESSION['invoicelines'][$name] += ['article_id' => $id];
-                    echo '
-                    <div class="webshop">
-                        <img class="cart" src="Images/'.$imageurl.'" alt="'.$name.'"><br>
-                        <p class="name"><a href="index.php?page=detail&id='.$id.'">'.$name.'</a></p><br>
-                        <p class="count">Items'.$count.'</p>
-                        <p class="price">€ '.$price.'</p>
-                        <p class="subtotal">€ '.$count*$price.'</p>
-                        <p class="description">'.$description.'</p><br>';
-                    if (isset($_SESSION['user'])) {
-                        addToCartForm($page, $name, $id);
-                        removeFromCartForm($page, $name, $id);
-                    }
-                    $grandTotal += ($count*$price);
-                    echo '</div>';
-                echo '</div>';
-                }
-                echo '<p class="total">Total = € '.$grandTotal.'</p><br>';
-                addActionForm("order", $page);
-            } 
-             else {
-                echo 'cart is empty G';
-                unset($_SESSION['invoicelines']);
-            }
-
-        }
-
-
         function addActionForm($action, $page, $name='', $id=0) {
             echo'
             <form method="POST" action="index.php">
