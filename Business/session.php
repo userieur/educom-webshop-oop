@@ -1,6 +1,7 @@
 <?php
 
     function doLoginUser($data) {
+        var_dump($data['form']['email']);
         $userInfo = findUserByEmail($data['form']['email']['value']);
         $_SESSION['user'] = $userInfo['username'];
         $_SESSION['userId'] = $userInfo['id'];

@@ -1,6 +1,5 @@
 <?php
-    require_once ("../views/HtmlDoc.php");
-    require_once ("../Business/basics.php");
+    require_once ("HtmlDoc.php");
 
     class BasicDoc extends HtmlDoc { 
         
@@ -20,7 +19,7 @@
 
         private function cssLinks() {
             echo'       
-        <link rel="stylesheet" href="../Presentation/stylesheet.css">';
+        <link rel="stylesheet" href="Presentation/stylesheet.css">';
         }
         
         protected function bodyHeader() {
@@ -38,18 +37,21 @@
             $this->buildMenuItems($this->data['sessionPages'], $this->data['page'], $class);
         }
 
-        private function buildMenuItems($pages, $currentPage, $class) {
+        private function buildMenuItems($menu, $currentPage, $class) {
             echo '
             <ul class="'.$class.'">';
-            foreach ($pages as $page => $label) {
-                echo'
-                <li><a class="' . (($page == $currentPage) ? "active" : "") . '"href="index.php?page='.$page.'">'.$label.'</a></li>';
+            foreach ($menu as $pages) {
+                foreach ($pages as $page => $label) {
+                    echo'
+                    <li><a class="' . (($page == $currentPage) ? "active" : "") . '"href="index.php?page='.$page.'">'.$label.'</a></li>';
+                }
             }
             echo '
             </ul>';
         }
 
         protected function mainContent() {
+            'echo ik ben main content';
         }
 
         private function bodyFooter()  {

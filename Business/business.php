@@ -1,7 +1,12 @@
 <?php
     require_once("constants.php");
+    require_once("session.php");
+    require_once("tosort.php");
+    require_once("utils.php");
+    require_once("validation.php");
 
     function amphMetamine($data) {
+        // Meta-data for all pages
         $data['mainPages'] = [HOME, ABOUT, CONTACT, WEBSHOP];
         if (isUserLoggedIn()) {
             $data['sessionPages'] = [USERPAGE, CART, LOGUIT];
@@ -10,6 +15,7 @@
             $data['sessionPages'] = [REGISTRATIE, LOGIN];
             $data['allowedToBuy'] = false;
         }
+        // Meta-data for form-pages
         switch($data['page']) {
             case 'contact':
             case 'registratie':
@@ -30,7 +36,8 @@
             case 'contact':
             case 'register':
             case 'login':
-            case 'userpage':    
+            case 'userpage':
+                // Actions for form-pages    
                 if (isPostRequest()) {
                     $data['form'] = validateForm($data['form']);
                 }
@@ -38,26 +45,35 @@
             case 'webshop':
             case 'detail':
             case 'cart':
+                // Actions for product-pages
+                $products = getItems($data);
+                $data['products'] = $products['products'];
+                $data['productsClass'] = $products['class'];
                 handleActions();
                 break;
         }
 
         if (isset($data['form']) && $data['form']['validForm']) {
+            // Redirects for form-pages, when form is valid
             switch ($data['page']) {
                 case 'contact':
                     $data['page'] = 'thanks';
+                    $data = amphMetamine($data);
                     break;
                 case 'registratie':
                     storeUser($data);
                     $data['page'] = 'login';
+                    $data = amphMetamine($data);
                     break;
                 case 'login':
                     doLoginUser($data);
                     $data['page'] = 'home';
+                    $data = amphMetamine($data);
                     break;
                 case 'userpage':
                     updatePassword($data);
                     $data['page'] = 'updated';
+                    $data = amphMetamine($data);
                     break;
             }
         }
@@ -65,7 +81,7 @@
     }
 
     function handleActions() {
-        $name = getVar('name');
+        $name = getVar('id');
         $action = getVar("action");
         switch($action) {
             case ACTION_ADD_TO_CART:
@@ -98,32 +114,32 @@
     function getForm($data) {
         switch($data['page']) {
             case 'contact':
-                $formArray = ['validForm' => false, 'css' => "form",
-                getFormLine(key:'sex', type:'select', label:'Aanhef:', placeholder:'Kies', options:['man|Dhr', 'woman|Mevr']),
-                getFormLine(key:'fname', type:'text', label:'Voornaam:', placeholder:'Jan', checks:[VALIDATE_NAME]),
-                getFormLine(key:'lname', type:'text', label:'Achternaam:', placeholder:'van der Steen', checks:[VALIDATE_NAME]),
-                getFormLine(key:'email', type:'email', label:'E-Mail:', placeholder:'jan.v.d.steen@provider.com', checks:[VALIDATE_EMAIL]),
-                getFormLine(key:'phone', type:'phone', label:'Telefoon:', placeholder:'0612345678 / 0101234567', checks:[VALIDATE_PHONE]),
-                getFormLine(key:'pref', type:'radio', label:'Ik word het liefst benaderd via:', options:['tel|Telefoon','mail|E-Mail']),
-                getFormLine(key:'story', type:'textbox', label:'Reden van contact:', placeholder:'Vul hier iets in')];
+                $formArray = ['validForm' => false, 'css' => "contactform",
+                'sex' => getFormLine(key:'sex', type:'select', label:'Aanhef:', placeholder:'Kies', options:['man|Dhr', 'woman|Mevr']),
+                'fname' => getFormLine(key:'fname', type:'text', label:'Voornaam:', placeholder:'Jan', checks:[VALIDATE_NAME]),
+                'lname' => getFormLine(key:'lname', type:'text', label:'Achternaam:', placeholder:'van der Steen', checks:[VALIDATE_NAME]),
+                'email' => getFormLine(key:'email', type:'email', label:'E-Mail:', placeholder:'jan.v.d.steen@provider.com', checks:[VALIDATE_EMAIL]),
+                'phone' => getFormLine(key:'phone', type:'phone', label:'Telefoon:', placeholder:'0612345678 / 0101234567', checks:[VALIDATE_PHONE]),
+                'pref' => getFormLine(key:'pref', type:'radio', label:'Ik word het liefst benaderd via:', options:['tel|Telefoon','mail|E-Mail']),
+                'story' => getFormLine(key:'story', type:'textbox', label:'Reden van contact:', placeholder:'Vul hier iets in')];
                 break;
             case 'registratie':
                 $formArray = ['validForm' => false, 'css' => "form",
-                getFormLine(key:'uname', type:'text', label:'Gebruikersnaam:', placeholder:'Kies', checks:[VALIDATE_NAME]),
-                getFormLine(key:'email', type:'email', label:'E-mail:', placeholder:'j.v.d.steen@provider.com', checks:[VALIDATE_EMAIL, USER_EMAIL_NOT_KNOWN]),
-                getFormLine(key:'pword', type:'password', label:'Wachtwoord:', placeholder:'vul wachtwoord in', checks:[VALIDATE_PASSWORD]),
-                getFormLine(key:'pwordcheck', type:'password', label:'Herhaal wachtwoord:', placeholder:'herhaal wachtwoord', checks:[VALIDATE_PASSWORD_EQUAL_ENTRY])];
+                'uname' => getFormLine(key:'uname', type:'text', label:'Gebruikersnaam:', placeholder:'Kies', checks:[VALIDATE_NAME]),
+                'email' => getFormLine(key:'email', type:'email', label:'E-mail:', placeholder:'j.v.d.steen@provider.com', checks:[VALIDATE_EMAIL, USER_EMAIL_NOT_KNOWN]),
+                'pword' => getFormLine(key:'pword', type:'password', label:'Wachtwoord:', placeholder:'vul wachtwoord in', checks:[VALIDATE_PASSWORD]),
+                'pwordcheck' => getFormLine(key:'pwordcheck', type:'password', label:'Herhaal wachtwoord:', placeholder:'herhaal wachtwoord', checks:[VALIDATE_PASSWORD_EQUAL_ENTRY])];
                 break;
             case 'login':
                 $formArray = ['validForm' => false, 'css' => "form",
-                getFormLine(key:'email', type:'email', label:'E-mail:', placeholder:'j.v.d.steen@provider.com', checks:[VALIDATE_EMAIL, USER_EMAIL_KNOWN]),
-                getFormLine(key:'pword', type:'password', label:'Wachtwoord:', placeholder:'vul wachtwoord in', checks:[VALIDATE_PASSWORD, USER_AUTHENTICATE])];
+                'email' => getFormLine(key:'email', type:'email', label:'E-mail:', placeholder:'j.v.d.steen@provider.com', checks:[VALIDATE_EMAIL, USER_EMAIL_KNOWN]),
+                'pword' => getFormLine(key:'pword', type:'password', label:'Wachtwoord:', placeholder:'vul wachtwoord in', checks:[VALIDATE_PASSWORD, USER_AUTHENTICATE])];
                 break;
             case 'userpage':
                 $formArray = ['validForm' => false, 'css' => "form",
-                getFormLine(key:'opword', type:'password', label:'Oude wachtwoord:', placeholder:'vul wachtwoord in', checks:[VALIDATE_PASSWORD, USER_AUTHENTICATE]),
-                getFormLine(key:'pword', type:'password', label:'Nieuwe Wachtwoord:', placeholder:'vul wachtwoord in', checks:[VALIDATE_PASSWORD]),
-                getFormLine(key:'pwordcheck', type:'password', label:'Herhaal nieuwe wachtwoord:', placeholder:'herhaal wachtwoord', checks:[VALIDATE_PASSWORD_EQUAL_ENTRY])];
+                'opword' => getFormLine(key:'opword', type:'password', label:'Oude wachtwoord:', placeholder:'vul wachtwoord in', checks:[VALIDATE_PASSWORD, USER_AUTHENTICATE]),
+                'pword' => getFormLine(key:'pword', type:'password', label:'Nieuwe Wachtwoord:', placeholder:'vul wachtwoord in', checks:[VALIDATE_PASSWORD]),
+                'pwordcheck' => getFormLine(key:'pwordcheck', type:'password', label:'Herhaal nieuwe wachtwoord:', placeholder:'herhaal wachtwoord', checks:[VALIDATE_PASSWORD_EQUAL_ENTRY])];
                 break;
             default:
                 break;
@@ -142,100 +158,34 @@
 
     function getFormLine(string $key, string $type, string $label, string $placeholder="", $options=array(), $checks=array()) {
         $options = splitOptions($options);
-        return [$key => ['key' => $key, 'type' => $type, 'label' => $label, 'placeholder' => $placeholder, 'options' => $options, 'checks' => $checks]];
+        return ['key' => $key, 'type' => $type, 'label' => $label, 'placeholder' => $placeholder, 'options' => $options, 'checks' => $checks];
     }
 
 
-    function showItems($data) {
-        
-        $data['products']=[];
-
-
-
-
-
-        echo '<div class="container">';
-        foreach($data as $key => $info) {
-            $id = $key;
-            $name = $info['name'];
-            $imageurl = $info['imageurl'];
-            $price = $info['price'];
-            $description = $info['description'];
-            echo '
-            <div class="webshop">
-                <img src="Images/'.$imageurl.'" alt="'.$name.'"><br>
-                <p class="name"><a href="index.php?page=detail&id='.$id.'">'.$name.'</a></p><br>
-                <p class="id">Productnr. = '.$id.'</p>
-                <p class="price">€ '.$price.'</p>
-                <p class="description">'.$description.'</p><br>';
-            if (isset($_SESSION['user'])) {
-                addActionForm(ACTION_ADD_TO_CART, $page, $name, $id);
-            }
-            echo '</div>';
-        echo '</div>';
+    function getItems($data) {
+        switch ($data['page']) {
+            case 'webshop':
+                $output['products'] = getAllProducts();
+                $output['class'] = "";
+                break;
+            case 'detail':
+                $id = getVar('id');
+                $output['products'][$id] = getProductById($id);
+                $output['class'] = "big";
+                break;
+            case 'cart':
+                // var_dump($_SESSION['cart']);
+                $output['products'] = getProductsByIdArray($_SESSION['cart']);
+                // var_dump($output['products']);
+                $output['products'] = getCartContent($output['products']);
+                var_dump($output['products']);
+                // $output['cart'] = getCartContent($output['products']);
+                $output['class'] = "cart";
+                break;
         }
-        return $data
+        return $output ?? NULL;
     }
 
-    function showDetailItem(string $page, array $info) {
-        $id = $info['id'];
-        $name = $info['name'];
-        $imageurl = $info['imageurl'];
-        $price = $info['price'];
-        $description = $info['description'];
-        echo '
-        <div class="webshop">
-            <img class="big" src="Images/'.$imageurl.'" alt="'.$name.'"><br>
-            <p class="name">'.$name.'</a></p><br>
-            <p class="id">Productnr. = '.$id.'</p>
-            <p class="price">€ '.$price.'</p>
-            <p class="description">'.$description.'</p><br>';
-        if (isset($_SESSION['user'])) {
-            addToCartForm($page, $name, $id);
-            removeFromCartForm($page, $name, $id);
-        }
-        echo '</div>';
-    }
 
-    function showCartItems($page, $data) {
-        echo '<div class="container">';
-        $grandTotal = 0;
-        $_SESSION['invoicelines'] = [];
-        if ($data) {
-            foreach($data as $key => $info) {
-                $id = $key;
-                $name = $info['name'];
-                $imageurl = $info['imageurl'];
-                $price = $info['price'];
-                $description = $info['description'];
-                $count = $_SESSION['cart'][$name];
-                $_SESSION['invoicelines'] += [$name => array()];
-                $_SESSION['invoicelines'][$name] += ['sales_amount' => $count];
-                $_SESSION['invoicelines'][$name] += ['sales_price' => $price];
-                $_SESSION['invoicelines'][$name] += ['article_id' => $id];
-                echo '
-                <div class="webshop">
-                    <img class="cart" src="Images/'.$imageurl.'" alt="'.$name.'"><br>
-                    <p class="name"><a href="index.php?page=detail&id='.$id.'">'.$name.'</a></p><br>
-                    <p class="count">Items'.$count.'</p>
-                    <p class="price">€ '.$price.'</p>
-                    <p class="subtotal">€ '.$count*$price.'</p>
-                    <p class="description">'.$description.'</p><br>';
-                if (isset($_SESSION['user'])) {
-                    addToCartForm($page, $name, $id);
-                    removeFromCartForm($page, $name, $id);
-                }
-                $grandTotal += ($count*$price);
-                echo '</div>';
-            echo '</div>';
-            }
-            echo '<p class="total">Total = € '.$grandTotal.'</p><br>';
-            addActionForm("order", $page);
-        } 
-         else {
-            echo 'cart is empty G';
-            unset($_SESSION['invoicelines']);
-        }
-    }
 
     

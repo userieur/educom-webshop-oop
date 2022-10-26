@@ -1,9 +1,5 @@
 <?php
     // Identifying the requested page + all functions
-    require_once("Business/basics.php");
-    require_once("Business/validation.php");
-    require_once("Business/utils.php");
-    require_once("Business/business.php");
 
     function showResponsePage($data) {
         $view = NULL;
@@ -53,9 +49,12 @@
                 $view = new CartDoc($data);
                 break;
             default:
-                require_once('views/UnknownPage.php');
-                $view = new UnknownPage($data);
+                require_once('views/HomeDoc.php');
+                $view = new HomeDoc($data);
                 break;
+                // require_once('views/UnknownPage.php');
+                // $view = new UnknownPage($data);
+                // break;
         }
         $view->show();
     }

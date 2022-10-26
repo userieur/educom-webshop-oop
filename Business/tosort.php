@@ -1,5 +1,6 @@
 <?php
     require_once("constants.php");
+    require_once("data.php");
 
     function getAllProducts() {
         $conn = connectDatabase();
@@ -15,22 +16,11 @@
 
     function getProductsByIdArray($array) {
         $conn = connectDatabase();
-        $idString = "";
-        $count = 0;
-        if ($array){
-            foreach ($array as $id => $amount) {
-                if ((count($array)-$count) > 1) {
-                    $idString.="'".$id."', ";
-                    $count += 1;
-                } else {
-                    $idString.="'".$id."'";
-                }
-            }
-            $sql = "SELECT * from products WHERE name IN (".$idString.")";
-            $output = readData($conn, $sql);
-            mysqli_close($conn);
-            return $output;
-        }
+        $string = "'".implode("','",array_keys($array))."'";
+        $sql = "SELECT * from products WHERE id IN (".$string.")";
+        $output = readData($conn, $sql);
+        mysqli_close($conn);
+        return $output;
     }
 
     function getProductById($id) {
@@ -64,44 +54,46 @@
         mysqli_close($conn);
     }    
 
-    function createInvoiceNumber() {
-        $date = currentDate();
-        $conn = connectDatabase();
-        $sql = "SELECT invoice_num from invoices ORDER BY ID DESC LIMIT 1";
-        $output = readData($conn, $sql);
-        
-        $values = array_values($output);
-        $string = $values[0]['invoice_num'];
-
-        if (str_contains($string, $date)) {
-            $count = substr($string, -4);
-            $int = intval($count);
-            $int += 1;
-            $count = str_pad(strval($int), 4, '0', STR_PAD_LEFT);
-            $invoiceNumber = $date.$count;
-        } else {
-            $invoiceNumber = $date."0001";
+    function getCartContent ($productArray) {
+        $output = $productArray;
+        foreach($_SESSION['cart'] as $id => $count) {
+            $output[$id]['count']=$count;
         }
-        echo($invoiceNumber);
-        return $invoiceNumber;
+        return $output;
     }
 
+
+    // function getInvoiceLines() {
+        
+    //     $invoiceLines = []
+    //     $cartContent = $_SESSION['cart'];
+    //     $_SESSION['invoicelines'];
+        
+    // }
+
     function placeOrder() {
+        $date = currentDate();
         $conn = connectDatabase();
-        $invoiceLines = $_SESSION['invoicelines'];
+        $invoiceLines = getInvoiceLines();
         $userId = $_SESSION['userId'];
-        $invoiceNum = createInvoiceNumber();
-        
+                
         // Create invoice
-        $sql = "INSERT INTO invoices (user_id, invoice_num) VALUES ('".$userId."', '".$invoiceNum."')";
-        writeData($conn, $sql);
-        
-        // Retrieve invoice number of created invoice from database
-        $sql = "SELECT id from invoices ORDER BY ID DESC LIMIT 1";
+        $sql = "INSERT INTO invoices (invoice_num) VALUES ('".$date.'0000'."')";
+        $output = writeData($conn, $sql);
+
+        $sql = "SELECT invoice_num from invoices ORDER BY invoice_num DESC LIMIT 1";
         $output = readData($conn, $sql);
         
-        $values = array_values($output);
-        $invoiceId = $values[0]['id'];
+        $invoiceNum = intval($output) + 1;
+            
+        $sql = "UPDATE invoices SET user_id='".$userId."', invoice_num='".$invoiceNum."') WHERE invoice_num='".$date.'0000'."')";
+        updateData($conn, $sql);
+        
+        // Retrieve invoice ID number of created invoice from database
+        $sql = "SELECT id from invoices WHERE invoice_num='".$invoiceNum."'";
+        $output = readData($conn, $sql);
+        
+        $invoiceId = array_shift($output);
 
         // Create SQL-strings for each invoice-line and insert them in invoice_lines database
         foreach ($invoiceLines as $line) {

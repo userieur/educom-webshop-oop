@@ -1,9 +1,15 @@
 <?php
-    require_once ("../views/BasicDoc.php");
+    require_once ("BasicDoc.php");
     
-    abstract class FormDoc extends BasicDoc {
+    abstract class FormsDoc extends BasicDoc {
+        
+        protected function mainContent() {
+            $this->showForm();
+        }
+        
         protected function showForm() {
             $this->showFormStart();
+            $this->showFormTitle();
             $this->showFormItems();
             $this->showFormEnd();
         }
@@ -13,6 +19,10 @@
             <form method="POST" action="index.php">
                 <div class="'.$this->data['form']['css']. '">
                 <input type="hidden" id="page" name="page" value="'.$this->data['page'].'">';
+        }
+
+        protected function showFormTitle() {
+
         }
 
         private function showFormItems() {
@@ -125,7 +135,7 @@
         private function createSpan($items) {
             $error = $items['error'] ?? "";
             echo '
-                    <span class="error">'.$error.'</span><br>';
+                    <span class="error">'.$error.'</span><br>'.PHP_EOL;
         }
 
         private function showFormEnd() {
