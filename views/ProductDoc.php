@@ -32,6 +32,7 @@
                     $this->addActionForm(ACTION_REMOVE_FROM_CART, $this->data['page'], $name, $id);
                 }
                 echo '</div>';
+            // hier moet weer terugkomen de orderknop - if class is order = doe order knop
             }
             echo '</div>';
         }
