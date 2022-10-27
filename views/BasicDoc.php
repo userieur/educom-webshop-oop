@@ -3,15 +3,15 @@
 
     class BasicDoc extends HtmlDoc { 
         
-        protected $data;
+        // protected $data;
 
-        public function __construct($myData) {
-            $this->data = $myData;
-        }
+        // public function __construct($myData) {
+        //     $this->data = $myData;
+        // }
 
         protected function title() {
             echo"
-        <title>My website - " . $this->data['page'] . "</title>";
+        <title>My website - " . $this->model['page'] . "</title>";
         }
 
         private function metaAuthor() {
@@ -29,12 +29,13 @@
 
         private function mainMenu() {
             $class = 'menu';
-            $this->buildMenuItems($this->data['mainPages'], $this->data['page'], $class);
+            $this->buildMenuItems($this->model->menu['mainPages'], $this->model->menu['page'], $class);
+            var_dump($this->model);
         }
     
         private function sessionMenu() {
             $class = 'menu';
-            $this->buildMenuItems($this->data['sessionPages'], $this->data['page'], $class);
+            $this->buildMenuItems($this->model->menu['sessionPages'], $this->model->menu['page'], $class);
         }
 
         private function buildMenuItems($menu, $currentPage, $class) {
