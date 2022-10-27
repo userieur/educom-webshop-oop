@@ -98,10 +98,8 @@
     }
 
     function validateInput($key, $items) {
-        var_dump($key);
         $checks = $items['checks'] ?? NULL;
         $value = cleanInput($_POST[$key]) ?? "";
-        var_dump($value);
         $output = ['value' => $value];
         if ($checks != NULL) {
             foreach($checks as $check) {
@@ -117,7 +115,6 @@
 
     function validateForm($data) {
         $output = $data;
-        // var_dump($output);
         $noErrors = true;
         foreach($data as $key => $items) {
             switch($key) {

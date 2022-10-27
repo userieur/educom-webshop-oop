@@ -29,6 +29,7 @@
                     <p class="description">'.$description.'</p><br>';
                 if ($this->data['allowedToBuy']) {
                     $this->addActionForm(ACTION_ADD_TO_CART, $this->data['page'], $name, $id);
+                    // if count 
                     $this->addActionForm(ACTION_REMOVE_FROM_CART, $this->data['page'], $name, $id);
                 }
                 echo '</div>';

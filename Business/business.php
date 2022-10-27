@@ -51,6 +51,10 @@
                 $data['productsClass'] = $products['class'];
                 handleActions();
                 break;
+            case 'loguit':
+                doLogoutUser();
+                $data['page'] = 'home';
+                $data = amphMetamine($data);
         }
 
         if (isset($data['form']) && $data['form']['validForm']) {
@@ -100,6 +104,7 @@
                     $_SESSION['cart'][$name] -= 1;
                 }
                 break;
+                // CASE ITEM WEG => unset
             case ACTION_ORDER:
                 if ($_SESSION['cart']) {
                     placeOrder();
