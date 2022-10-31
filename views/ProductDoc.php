@@ -8,8 +8,8 @@
         }
 
         function showItems() {
-            $items = $this->data['products'];
-            $class = $this->data['productsClass'];
+            $items = $this->model->products;
+            $class = $this->model->productsClass;
             echo '
             <div class="container">';
             foreach($items as $productId => $info) {
@@ -27,10 +27,10 @@
                     <p class="id">Productnr. = '.$id.'</p>
                     <p class="price">€ '.$price.'</p>
                     <p class="description">'.$description.'</p><br>';
-                if ($this->data['allowedToBuy']) {
-                    $this->addActionForm(ACTION_ADD_TO_CART, $this->data['page'], $name, $id);
+                if ($this->model->menu['allowedToBuy']) {
+                    $this->addActionForm(ACTION_ADD_TO_CART, $this->model->page, $name, $id);
                     // if count 
-                    $this->addActionForm(ACTION_REMOVE_FROM_CART, $this->data['page'], $name, $id);
+                    $this->addActionForm(ACTION_REMOVE_FROM_CART, $this->model->page, $name, $id);
                 }
                 echo '</div>';
             // hier moet weer terugkomen de orderknop - if class is order = doe order knop

@@ -2,19 +2,17 @@
     require_once("./controllers/PageController.php");
     require_once("./Business/Utils.php");
 
-    class PageModel extends PageController {
+    class PageModel {
 
         public $page;
         protected $isPost = false;
         public $menu;
-        public $errors = array();
         public $genericErr = '';    
-        protected $sessionManager;
+        public $sessionManager;
 
         public function __construct($copy) {
             if (empty($copy)) {
-                // ==> First instance of PageModel
-                // $this->sessionManager = new SessionManager();
+                $this->sessionManager = new SessionManager();
             } else {
                 // ==> Called from the constructor of an extended class.... 
                 $this->page = $copy->page;
@@ -38,11 +36,4 @@
             $this->page = $newPage;
         } 
 
-        // public function createMenu() {
-        //     $this->menu['home'] = new MenuItem('home', 'HOME');
-        //     if ($this->sessionManger->isUserLoggedIn()) {
-        //         $this->menu['logout'] = new MenuItem('logout', 'LOGOUT', 
-        //         $this->sessionManager->getLoggedInUser()['name']);
-        //     }
-        // }
     }

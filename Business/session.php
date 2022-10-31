@@ -1,22 +1,23 @@
 <?php
+    require_once("Business/business.php");
 
-    function doLoginUser($data) {
-        var_dump($data['form']['email']);
-        $userInfo = findUserByEmail($data['form']['email']['value']);
-        $_SESSION['user'] = $userInfo['username'];
-        $_SESSION['userId'] = $userInfo['id'];
-        $_SESSION['email'] = $userInfo['email'];
-        $_SESSION['cart'] = array();
+    class SessionManager {
+        function doLoginUser($user) {
+            $_SESSION['user'] = $user['userName'];
+            $_SESSION['userId'] = $user['userId'];
+            $_SESSION['email'] = $user['email'];
+            $_SESSION['cart'] = array();
+        }
+    
+        function isUserLoggedIn() {
+            return isset($_SESSION['user']);
+        }
+    
+        function getLoggedInUser() {
+            return $_SESSION('user');
+        }
+    
+        function doLogoutUser() {
+            session_unset();
+        }
     }
-
-    function isUserLoggedIn() {
-        return isset($_SESSION['user']);
-    }
-
-    function getLoggedInUser() {
-        return $_SESSION('user');
-    }
-
-    function doLogoutUser() {
-        session_unset();
-}

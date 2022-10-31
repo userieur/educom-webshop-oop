@@ -1,37 +1,44 @@
 <?php
+    require_once("./Business/session.php");
+    require_once("./Business/utils.php");
 
     class UserModel extends PageModel {
-        public $email = '';  // or $meta = array();
-        public $name = '';  // of $values = array();
-        public $password = '';
-        public $emailErr = '';     
-        private $userId = 0;
-        public $valid = false;
+        public $form = [];
+        public $user = [];
 
         public function __construct($pageModel) {
             PARENT::__construct($pageModel);
         }
 
-        public function validateLogin() {
-            $this->valid = true;
+        public function doLoginUser() {
+            $this->sessionManager->doLoginUser($this->user);
+        }
+
+        public function doLogoutUser() {
+            $this->sessionManager->doLogoutUser();
+        }
+
+        public function authenticateUser() {
+            if (empty($this->form['email']['error'])) {
+                $userInfo = User::findUserByEmail($this->form['email']['value']);
+            } else {
+                return NULL;
             }
 
-        private function authenticateUser() {
-            require_once "db_repositor.php";
-            $user = findUserByEmail($this->email);
-            // password validatie
-
-            $this->name = $user['name']; 
-            // $this->values['name'] = $user['name'];
-            $this->userId = $user['id'];
+            if (empty($userInfo)) {
+                $this->form['email']['error'] = "E-Mail not found";
+                $this->form['validForm'] = false;
+            } elseif (!empty($userInfo) && ($this->form['pword']['value'] != Utils::cleanInput($userInfo['password']))) {
+                $this->form['pword']['error'] = "Password incorrect";
+            } else {
+                $this->user['userName'] = $userInfo['username'];
+                $this->user['email'] = $userInfo['email'];
+                $this->user['userId'] = $userInfo['id'];
+                return true;
+            }
+            return NULL;
         }
-
-        public function doLoginUser() {
-            $this->sessionManager->doLoginUser($this->name, $this->userId);
-            $this->genericErr = "Login successvol";
-            // $this->errors['genericError'] = "Login successvol";
-        }
-
+    
     }
 
 

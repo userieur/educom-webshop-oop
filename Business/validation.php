@@ -1,138 +1,136 @@
 <?php
-    function validName($value) {
-        if (empty($value)) {
-            $error = "Name is required";
-        } elseif (!preg_match("/^[a-zA-Z-' ]*$/",$value)) {
-            $error = "Only letters and white space allowed"; 
-        }
-        return $error ?? NULL;
-    }
+    require_once ("./Business/data.php");
+    require_once ("./Business/utils.php");
 
-    function validEmail($value) {
-        if (empty($value)) {
-            $error = "E-mail address is required";
-        } elseif (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            $error = "Please enter a correct e-mail address";
-        }
-        return $error ?? NULL;
-    }
+    class Validate {
 
-    function validPhone($value) {
-        if (empty($value)) {
-            $error = "Phone is required";
-        } elseif (!is_numeric($value)) {
-            $error = "Please enter a correct phone number";
-        }
-        return $error ?? NULL;
-    }
+        private $output;
+        private $noErrors;
 
-    function validComment($value) {
-        if (empty($value)) {
-            $error = "Please enter reasons";
+        public function __construct() {
+            $this->output = [];
+            $this->noErrors = true;
         }
-        return $error ?? NULL;
-    }
 
-    function validPassword($value) {
-        if (empty($value)) {
-            $error = "Please enter password";
-        } elseif (!preg_match("/^[a-zA-Z-' ]*$/",$value)) {
-            $error = "Only letters and white space allowed"; 
-        }
-        return $error ?? NULL;
-    }
-
-    function equalTo($value, $functionVar="") {
-        $comparable = cleanInput($_POST[$functionVar]);
-        if (empty($value)) {
-            $error = "Please repeat input";
-        } elseif ($value != $comparable) {
-            $error = "Input does not match"; 
-        }  
-        return $error ?? NULL;
-    }
-
-    function emailNotKnown($value) {
-        $exists = doesEmailExist($value);
-        if ($exists) {
-            $error = "E-Mail already exists";
-        }
-        return $error ?? NULL;
-    }
-
-    function emailKnown($value) {
-        $exists = doesEmailExist($value);
-        if (!$exists) {
-            $error = "E-Mail not known";
-        }
-        return $error ?? NULL;
-    }
-
-    function authenticateUser($value) {
-        if (!isUserLoggedIn()) {
-            $email = cleanInput($_POST['email']);
-        } else {
-            $email = $_SESSION['email'];
-        }
-        $userInfo = findUserByEmail($email);
-            if ($value != cleanInput($userInfo['password'])) {
-                $error = "Password incorrect";
+        private function validName($value) {
+            if (empty($value)) {
+                $error = "Name is required";
+            } elseif (!preg_match("/^[a-zA-Z-' ]*$/",$value)) {
+                $error = "Only letters and white space allowed"; 
             }
-        return $error ?? NULL;  
+            return $error ?? NULL;
         }
-
-    function checkForError ($value, $check) {
-        $param = $param ?? array();
-        $checkArray = explode(":", $check);
-        $functionName = $checkArray[0] ?? $check;
-        $functionVar = $checkArray[1] ?? NULL;
-        $error = call_user_func_array($functionName, array($value, $functionVar));
-        return $error;
-    }
-
-    function cleanInput ($value) {
-        $value = trim($value);
-        $value = stripslashes($value);
-        $value = htmlspecialchars($value);
-        return $value;
-    }
-
-    function validateInput($key, $items) {
-        $checks = $items['checks'] ?? NULL;
-        $value = cleanInput($_POST[$key]) ?? "";
-        $output = ['value' => $value];
-        if ($checks != NULL) {
-            foreach($checks as $check) {
-                $error = checkForError($value, $check);
-                if ($error != NULL) {
-                    $output += ['error' => $error];
-                    break;
-                }
+    
+        private function validEmail($value) {
+            if (empty($value)) {
+                $error = "E-mail address is required";
+            } elseif (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                $error = "Please enter a correct e-mail address";
             }
+            return $error ?? NULL;
         }
-        return $output;
-    }           
+    
+        private function validPhone($value) {
+            if (empty($value)) {
+                $error = "Phone is required";
+            } elseif (!is_numeric($value)) {
+                $error = "Please enter a correct phone number";
+            }
+            return $error ?? NULL;
+        }
+    
+        private function validComment($value) {
+            if (empty($value)) {
+                $error = "Please enter reasons";
+            }
+            return $error ?? NULL;
+        }
+    
+        private function validPassword($value) {
+            if (empty($value)) {
+                $error = "Please enter password";
+            } elseif (!preg_match("/^[a-zA-Z-' ]*$/",$value)) {
+                $error = "Only letters and white space allowed"; 
+            }
+            return $error ?? NULL;
+        }
+    
+        private function equalTo($value, $functionVar="") {
+            $comparable = Utils::cleanInput($_POST[$functionVar]);
+            if (empty($value)) {
+                $error = "Please repeat input";
+            } elseif ($value != $comparable) {
+                $error = "Input does not match"; 
+            }  
+            return $error ?? NULL;
+        }
+    
+        private function emailNotKnown($value) {
+            $exists = User::doesEmailExist($value);
+            if ($exists) {
+                $error = "E-Mail already exists";
+            }
+            return $error ?? NULL;
+        }
+    
+        private function emailKnown($value) {
+            $exists = User::doesEmailExist($value);
+            if (!$exists) {
+                $error = "E-Mail not known";
+            }
+            return $error ?? NULL;
+        }
+    
 
-    function validateForm($data) {
-        $output = $data;
-        $noErrors = true;
-        foreach($data as $key => $items) {
-            switch($key) {
-                case 'validForm':
-                case 'css':
-                    break;
-                default:
-                    $checkedInput = validateInput($key, $items);
-                    $output[$key] += ['value' => $checkedInput['value']];
-                    if (isset($checkedInput['error'])) {
-                        $noErrors = false;
-                        $output[$key] += ['error' => $checkedInput['error']];
+        private function checkForError ($value, $check) {
+            $param = $param ?? array();
+            $checkArray = explode(":", $check);
+            $functionName = $checkArray[0] ?? $check;
+            $functionVar = $checkArray[1] ?? NULL;
+            $error = call_user_func_array(array($this, $functionName), array($value, $functionVar));
+            return $error;
+        }
+
+    
+        private function validateInput($key, $items) {
+            $checks = $items['checks'] ?? NULL;
+            $value = Utils::cleanInput($_POST[$key]) ?? "";
+            $output = ['value' => $value];
+            if ($checks != NULL) {
+                foreach($checks as $check) {
+                    $error = self::checkForError($value, $check);
+                    if ($error != NULL) {
+                        $output += ['error' => $error];
+                        break;
                     }
                 }
+            }
+            return $output;
+        }           
+    
+        public function validateForm($data) {
+            $this->output = $data;
+            foreach($data as $key => $items) {
+                switch($key) {
+                    case 'validForm':
+                    case 'css':
+                        break;
+                    default:
+                        $checkedInput = self::validateInput($key, $items);
+                        $this->output[$key] += ['value' => $checkedInput['value']];
+                        if (isset($checkedInput['error'])) {
+                            $this->noErrors = false;
+                            $this->output[$key] += ['error' => $checkedInput['error']];
+                        }
+                }
+            }
+            if ($this->noErrors) {
+                $this->output['validForm'] = true;
+            }
+            $output = $this->output;
+            $this->output = [];
+            return $output;
         }
-        if ($noErrors) {
-            $output['validForm'] = true;
-        }
-        return $output;
     }
-?>
+
+    

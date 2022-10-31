@@ -1,23 +1,12 @@
 <?php
 
     class Utils {
-
-        // function getRequestedPage() {     
-        //     $requested_type = $_SERVER['REQUEST_METHOD']; 
-        //     if ($requested_type == 'POST') { 
-        //         $requested_page = getPostVar('page','home'); 
-        //     } else { 
-        //         $requested_page = getUrlVar('page','home'); 
-        //     } 
-        //     return $requested_page;
-        // }
-
-        public function getVar($key, $default='') {
+        public static function getVar($key, $default='') {
             $requested_type = $_SERVER['REQUEST_METHOD']; 
             if ($requested_type == 'POST') { 
-                $var = $this->getPostVar($key,'postvar'); 
+                $var = Utils::getPostVar($key,'postvar'); 
             } else { 
-                $var = $this->getUrlVar($key,'getvar'); 
+                $var = Utils::getUrlVar($key,'getvar'); 
             } 
             return $var;
         }
@@ -47,8 +36,10 @@
             return mysqli_real_escape_string($conn, $value);
         }
 
-        public static function doesEmailExist($email) {
-            $userInfo = findUserByEmail($email);
-            return !empty($userInfo);
+        public static function cleanInput ($value) {
+            $value = trim($value);
+            $value = stripslashes($value);
+            $value = htmlspecialchars($value);
+            return $value;
         }
     }

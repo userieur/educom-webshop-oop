@@ -1,5 +1,6 @@
 <?php
     require_once ("BasicDoc.php");
+    require_once("./models/UserModel.php");
     
     abstract class FormsDoc extends BasicDoc {
         
@@ -17,8 +18,8 @@
         private function showFormStart() {
             echo '
             <form method="POST" action="index.php">
-                <div class="'.$this->data['form']['css']. '">
-                <input type="hidden" id="page" name="page" value="'.$this->data['page'].'">';
+                <div class="'.$this->model->form['css']. '">
+                <input type="hidden" id="page" name="page" value="'.$this->model->page.'">';
         }
 
         protected function showFormTitle() {
@@ -26,7 +27,7 @@
         }
 
         private function showFormItems() {
-            foreach($this->data['form'] as $key => $items){
+            foreach($this->model->form as $key => $items){
                 switch($key) {
                     case 'validForm':
                     case 'css':

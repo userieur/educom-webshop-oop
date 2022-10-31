@@ -1,7 +1,13 @@
 <?php
     require_once("./models/PageModel.php");
+    require_once("./models/UserModel.php");
+    require_once("./models/ShopModel.php");
     require_once("./Business/constants.php");
     require_once("./Business/session.php");
+    require_once("./Business/utils.php");
+    require_once("./Business/validation.php");
+    require_once("./Business/business.php");
+    require_once("./Business/data.php");
 
     class PageController {
     
@@ -17,115 +23,94 @@
             $this->showResponsePage();
         }
 
-
-        // from client
         private function getRequest() {
             $this->model->getRequestedPage();
         }
 
-        // business flow code
-        private function processRequests() {
-            switch($this->model->page) {
-                case "Login":
-                    $this->model = new UserModel
-                        ($this->model);
+        private function processRequest() {
+            switch ($this->model->page) {
+                case 'contact':
+                case 'registratie':
+                case 'login':
+                case 'userpage':
+                    $this->processForm();
+                    break;
+                case 'webshop':
+                case 'detail':
+                case 'cart':
+                    $this->processShop();
+                    break;
+                case 'loguit':
+                    // Moet dit miss nog aanpassen, maar in principe werkt het..
+                    $this->model->sessionManager->doLogoutUser();
+                    $this->model->page = 'home';
+            }
+            $this->buildMenu();
+        }
+  
+        private function processForm() {
+            // 1. Update current MODEL with extra variables
+            $this->model = new UserModel($this->model);
 
-                    $this->model->validateLogin();
-                    if ($this->model->valid) {
-                        $this->model->doLoginUser();
-                        $this->model->setPage("home");
+            // 2. Standard empty form with GET-Request
+            $this->model->form = Form::getForm($this->model->page);
+
+            // (3a). When POST-request, fill form with VALUES and check for ERRORS
+            //// VRAAG: Is er een global mogelijk zoals $this->FORM & $this->VALIDATIONS ipv model->form etc.
+            //// OPMERKING: Onderstaand voelt wat houtje touwtje, maar was de 'vlugge oplossing' zodat er een
+            //// object Validate gemaakt werd, waarin ik tijdelijk de email kon opslaan voordat ik hem
+            //// een connectie met de database laat maken. Kan dat command wat overzichtelijker / andere manier?
+            if (Utils::isPostRequest()) {
+                $this->model->validations = new Validate();
+                $this->model->form = $this->model->validations->validateForm($this->model->form);
+
+                // (3b). When form is VALID: (do ACTION &) SWITCH Page
+                if ($this->model->form['validForm']) {
+                    switch ($this->model->page) {
+                        case 'contact':
+                            $this->model->page = 'thanks';
+                            break; 
+                        case 'registratie':
+                            User::storeUser($this->model->form);
+                            $this->model->page = 'login';
+                            break;
+                        case 'login':
+                            if ($this->model->authenticateUser()) {
+                                $this->model->doLoginUser();
+                                $this->model->page = 'home';
+                            }
+                            break;
+                        case 'userpage':
+                            if ($this->model->authenticateUser()) {
+                                User::updatePassword($this->model->form);
+                                $this->model->page = 'updated';
+                            }
+
+
+                            break;
                     }
-                break;
+                }
             }
         }
 
-        private function amphMetamine() {
-            // Meta-data for all pages
+        private function processShop() {
+            // Update current MODEL with extra variables
+            $this->model = new ShopModel($this->model);
+            $this->model->handleActions();
+        }
+
+        private function buildMenu() {
             $this->model->menu['mainPages'] = [HOME, ABOUT, CONTACT, WEBSHOP];
-            if (isUserLoggedIn()) {
+            if ($this->model->sessionManager->isUserLoggedIn()) {
                 $this->model->menu['sessionPages'] = [USERPAGE, CART, LOGUIT];
                 $this->model->menu['allowedToBuy'] = true;
             } else {
                 $this->model->menu['sessionPages'] = [REGISTRATIE, LOGIN];
                 $this->model->menu['allowedToBuy'] = false;
             }
-            // Meta-data for form-pages
-            // switch($this->model['page']) {
-            //     case 'contact':
-            //     case 'registratie':
-            //     case 'login':
-            //     case 'userpage':
-            //         $this->model['form'] = getForm($this->model);
-            //         break;
-            //     default:
-            //         break;
-            // }
         }
-    
-
-        private function processRequest() {
-            $this->amphMetamine();
-    
-            // switch ($this->model->page) {
-            //     case 'contact':
-            //     case 'register':
-            //     case 'login':
-            //     case 'userpage':
-            //         // Actions for form-pages    
-            //         if (Utils::isPostRequest()) {
-            //             $this->model['form'] = validateForm($this->model['form']);
-            //         }
-            //         break;
-            //     case 'webshop':
-            //     case 'detail':
-            //     case 'cart':
-            //         // Actions for product-pages
-            //         $products = getItems($this->model);
-            //         $this->model['products'] = $products['products'];
-            //         $this->model['productsClass'] = $products['class'];
-            //         handleActions();
-            //         break;
-            //     case 'loguit':
-            //         doLogoutUser();
-            //         $this->model['page'] = 'home';
-            //         $this->model = amphMetamine();
-            // }
-    
-            // if (isset($data['form']) && $data['form']['validForm']) {
-            //     // Redirects for form-pages, when form is valid
-            //     switch ($data['page']) {
-            //         case 'contact':
-            //             $data['page'] = 'thanks';
-            //             $data = amphMetamine($data);
-            //             break;
-            //         case 'registratie':
-            //             storeUser($data);
-            //             $data['page'] = 'login';
-            //             $data = amphMetamine($data);
-            //             break;
-            //         case 'login':
-            //             doLoginUser($data);
-            //             $data['page'] = 'home';
-            //             $data = amphMetamine($data);
-            //             break;
-            //         case 'userpage':
-            //             updatePassword($data);
-            //             $data['page'] = 'updated';
-            //             $data = amphMetamine($data);
-            //             break;
-                // }
-            // }
-        }
-
-
-
-        
-
-        // to client: presentatie laag
 
         private function showResponsePage() {
-            // $this->model->createMenu();
-            $view = NULL;
             switch($this->model->page){
                 case 'home':
                     require_once('views/HomeDoc.php');
