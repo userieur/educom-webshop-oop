@@ -9,12 +9,15 @@
     require_once("./Business/business.php");
     require_once("./Business/data.php");
 
+    // define("MODEL", '$this->model');
+        
     class PageController {
-    
+        
         private $model;
    
         public function __construct() {
             $this->model = new PageModel(NULL);
+            define("MODEL", $this->model);
         }
 
         public function handleRequest() {
@@ -24,11 +27,11 @@
         }
 
         private function getRequest() {
-            $this->model->getRequestedPage();
+            MODEL->getRequestedPage();
         }
 
         private function processRequest() {
-            switch ($this->model->page) {
+            switch (MODEL->page) {
                 case 'contact':
                 case 'registratie':
                 case 'login':
@@ -57,9 +60,6 @@
 
             // (3a). When POST-request, fill form with VALUES and check for ERRORS
             //// VRAAG: Is er een global mogelijk zoals $this->FORM & $this->VALIDATIONS ipv model->form etc.
-            //// OPMERKING: Onderstaand voelt wat houtje touwtje, maar was de 'vlugge oplossing' zodat er een
-            //// object Validate gemaakt werd, waarin ik tijdelijk de email kon opslaan voordat ik hem
-            //// een connectie met de database laat maken. Kan dat command wat overzichtelijker / andere manier?
             if (Utils::isPostRequest()) {
                 $this->model->validations = new Validate();
                 $this->model->form = $this->model->validations->validateForm($this->model->form);
@@ -75,7 +75,7 @@
                             $this->model->page = 'login';
                             break;
                         case 'login':
-                            if ($this->model->authenticateUser()) {
+                            if (MODEL->authenticateUser()) {
                                 $this->model->doLoginUser();
                                 $this->model->page = 'home';
                             }
@@ -85,8 +85,6 @@
                                 User::updatePassword($this->model->form);
                                 $this->model->page = 'updated';
                             }
-
-
                             break;
                     }
                 }

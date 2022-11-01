@@ -13,6 +13,8 @@
             $this->productsClass = $items['class'];
         }
 
+
+
         public function getItems() {
             switch ($this->page) {
                 case 'webshop':
@@ -25,8 +27,8 @@
                     $output['class'] = "big";
                     break;
                 case 'cart':
-                    $output['products'] = self::getProductsByIdArray($_SESSION['cart']);
-                    $output['products'] = self::getCartContent($output['products']);
+                    $products = self::getProductsByIdArray($_SESSION['cart']);
+                    $output['products'] = self::getCartContent($products);
                     $output['class'] = "cart";
                     break;
             }

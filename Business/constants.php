@@ -26,3 +26,6 @@
     define("CART", ['cart' => 'Cart']);
     define("REGISTRATIE", ['registratie' => 'Registratie']);
     define("USERPAGE", ['userpage' => 'Userpage']);
+
+    //MODEL
+    // define("MODEL", '$this->model');
