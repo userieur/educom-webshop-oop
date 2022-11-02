@@ -1,6 +1,4 @@
 <?php
-    require_once("Business/business.php");
-
     class SessionManager {
         function doLoginUser($user) {
             $_SESSION['user'] = $user['userName'];

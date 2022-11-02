@@ -1,23 +1,18 @@
 <?php
     require_once("./models/PageModel.php");
     require_once("./models/UserModel.php");
+    require_once("./models/FormModel.php");
     require_once("./models/ShopModel.php");
-    require_once("./Business/constants.php");
-    require_once("./Business/session.php");
-    require_once("./Business/utils.php");
-    require_once("./Business/validation.php");
-    require_once("./Business/business.php");
-    require_once("./Business/data.php");
-
-    // define("MODEL", '$this->model');
-        
+    require_once("constants.php");
+    require_once("utils.php");
+    require_once("./models/validations/validation.php");
+      
     class PageController {
         
         private $model;
    
-        public function __construct() {
-            $this->model = new PageModel(NULL);
-            define("MODEL", $this->model);
+        public function __construct($pageModel) {
+            $this->model = $pageModel;
         }
 
         public function handleRequest() {
@@ -27,11 +22,11 @@
         }
 
         private function getRequest() {
-            MODEL->getRequestedPage();
+            $this->model->getRequestedPage();
         }
 
         private function processRequest() {
-            switch (MODEL->page) {
+            switch ($this->model->page) {
                 case 'contact':
                 case 'registratie':
                 case 'login':
@@ -44,47 +39,40 @@
                     $this->processShop();
                     break;
                 case 'loguit':
-                    // Moet dit miss nog aanpassen, maar in principe werkt het..
-                    $this->model->sessionManager->doLogoutUser();
+                    $this->model = new UserModel($this->model);
+                    $this->model->doLogoutUser();
                     $this->model->page = 'home';
             }
             $this->buildMenu();
         }
   
         private function processForm() {
-            // 1. Update current MODEL with extra variables
-            $this->model = new UserModel($this->model);
+            $this->model = new FormModel($this->model);
 
-            // 2. Standard empty form with GET-Request
-            $this->model->form = Form::getForm($this->model->page);
+            $this->model->form = $this->model->getForm($this->model->page);
 
-            // (3a). When POST-request, fill form with VALUES and check for ERRORS
-            //// VRAAG: Is er een global mogelijk zoals $this->FORM & $this->VALIDATIONS ipv model->form etc.
             if (Utils::isPostRequest()) {
                 $this->model->validations = new Validate();
                 $this->model->form = $this->model->validations->validateForm($this->model->form);
 
-                // (3b). When form is VALID: (do ACTION &) SWITCH Page
                 if ($this->model->form['validForm']) {
                     switch ($this->model->page) {
                         case 'contact':
                             $this->model->page = 'thanks';
                             break; 
                         case 'registratie':
-                            User::storeUser($this->model->form);
+                            $this->model->storeUser($this->model->form);
                             $this->model->page = 'login';
                             break;
                         case 'login':
-                            if (MODEL->authenticateUser()) {
+                            if ($this->model->authenticateUser()) {
                                 $this->model->doLoginUser();
                                 $this->model->page = 'home';
                             }
                             break;
                         case 'userpage':
-                            if ($this->model->authenticateUser()) {
-                                User::updatePassword($this->model->form);
+                                $this->model->pdo->updatePassword($this->model->form['pword']['value']);
                                 $this->model->page = 'updated';
-                            }
                             break;
                     }
                 }
@@ -92,7 +80,6 @@
         }
 
         private function processShop() {
-            // Update current MODEL with extra variables
             $this->model = new ShopModel($this->model);
             $this->model->handleActions();
         }
@@ -155,12 +142,9 @@
                     $view = new CartDoc($this->model);
                     break;
                 default:
-                    require_once('views/HomeDoc.php');
-                    $view = new HomeDoc($this->model);
+                    require_once('views/UnknownDoc.php');
+                    $view = new UnknownDoc($this->model);
                     break;
-                    // require_once('views/UnknownPage.php');
-                    // $view = new UnknownPage($this->model);
-                    // break;
             }
             $view->show();
         }

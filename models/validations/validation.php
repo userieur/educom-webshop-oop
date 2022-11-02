@@ -1,6 +1,6 @@
 <?php
-    require_once ("./Business/data.php");
-    require_once ("./Business/utils.php");
+    require_once ("./data/data.php");
+    require_once ("utils.php");
 
     class Validate {
 

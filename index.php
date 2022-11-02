@@ -1,15 +1,15 @@
 <?php
     require_once("controllers/PageController.php");
+    require_once("data/Crud.php");
 
     session_start();
     
-    // var_dump($_SESSION);
-
-    $controller = new PageController();
+    $crud = new Crud();
+    $pageModel = new PageModel(NULL, $crud);
+    $controller = new PageController($pageModel);
     $controller->handleRequest();
 
     // TO DO
     // Orderknop + order wegschrijven -> niet meer gechecked sinds method update
     // Error-trace | Doen bij CRUD?
-    // Thanks pagina | Unknown pagina | Updated Pagina
     // Test formulieren maken voor contact, registratie, login, updated

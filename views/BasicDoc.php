@@ -19,7 +19,7 @@
 
         private function cssLinks() {
             echo'       
-        <link rel="stylesheet" href="Presentation/stylesheet.css">';
+        <link rel="stylesheet" href="public/css/stylesheet.css">';
         }
         
         protected function bodyHeader() {

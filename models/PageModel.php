@@ -1,25 +1,26 @@
 <?php
-    require_once("./controllers/PageController.php");
-    require_once("./Business/Utils.php");
+    // require_once("session.php");
+    // require_once("controllers/PageController.php");
+    // require_once("utils.php");
 
     class PageModel {
 
         public $page;
         protected $isPost = false;
         public $menu;
-        public $genericErr = '';    
         public $sessionManager;
+        public $pdo;
 
-        public function __construct($copy) {
+        public function __construct($copy, $pdo) {
             if (empty($copy)) {
                 $this->sessionManager = new SessionManager();
+                $this->pdo = $pdo;
             } else {
-                // ==> Called from the constructor of an extended class.... 
                 $this->page = $copy->page;
                 $this->isPost = $copy->isPost;
                 $this->menu = $copy->menu;
-                $this->genericErr = $copy->genericErr;
-                $this->sessionManager = $copy->sessionManager; 
+                $this->sessionManager = $copy->sessionManager;
+                $this->pdo = $copy->pdo;
             }
         }
 

@@ -21,7 +21,7 @@
                 $countstring = isset($info['count']) ? '<p class="count">Items '.$info['count'].'</p>' : "";
                 echo '
                 <div class="webshop">
-                    <img class="'.$class.'"src="Images/'.$imageurl.'" alt="'.$name.'">
+                    <img class="'.$class.'"src="public/images/'.$imageurl.'" alt="'.$name.'">
                     <p class="name"><a href="index.php?page=detail&id='.$id.'">'.$name.'</a></p>'.
                     $countstring.'
                     <p class="id">Productnr. = '.$id.'</p>
@@ -33,7 +33,9 @@
                     $this->addActionForm(ACTION_REMOVE_FROM_CART, $this->model->page, $name, $id);
                 }
                 echo '</div>';
-            // hier moet weer terugkomen de orderknop - if class is order = doe order knop
+            }
+            if ($this->model->page == 'cart') {
+                $this->addActionForm(ACTION_ORDER, $this->model->page, $name, $id);
             }
             echo '</div>';
         }

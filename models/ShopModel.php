@@ -1,13 +1,13 @@
 <?php
-    require_once("./Business/session.php");
-    require_once("./Business/data.php");
+    // require_once("session.php");
+    // require_once("./data/data.php");
 
     class ShopModel extends PageModel {
         public $products = [];
         public $productsClass = NULL;
 
         public function __construct($pageModel) {
-            PARENT::__construct($pageModel);
+            PARENT::__construct($pageModel, NULL);
             $items = $this->getItems();
             $this->products = $items['products'];
             $this->productsClass = $items['class'];
