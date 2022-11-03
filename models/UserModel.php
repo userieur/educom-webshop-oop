@@ -1,13 +1,15 @@
 <?php
     require_once("session.php");
     require_once("utils.php");
+    require_once("data/CrudUser.php");
 
     class UserModel extends PageModel {
         public $form = [];
         public $user = [];
 
-        public function __construct($pageModel) {
-            PARENT::__construct($pageModel, NULL);
+        public function __construct($pageModel, $crud) {
+            PARENT::__construct($pageModel, $crud);
+            $this->crud = $crud;
         }
 
         public function doLoginUser() {
@@ -20,58 +22,44 @@
 
         public function authenticateUser() {
             if (empty($this->form['email']['error'])) {
-                $userInfo = $this->findUserByEmail($this->form['email']['value']);
+                $userInfo = $this->crud->findUserByEmail($this->form['email']['value']);
+                // var_dump($userInfo);
             } else {return NULL;}
 
             if (empty($userInfo)) {
                 $this->form['email']['error'] = "E-Mail not found";
                 $this->form['validForm'] = false;
-            } elseif (!empty($userInfo) && ($this->form['pword']['value'] != Utils::cleanInput($userInfo['password']))) {
+            } elseif (!empty($userInfo) && ($this->form['pword']['value'] != Utils::cleanInput($userInfo->password))) {
                 $this->form['pword']['error'] = "Password incorrect";
             } else {
-                $this->user['userName'] = $userInfo['username'];
-                $this->user['email'] = $userInfo['email'];
-                $this->user['userId'] = $userInfo['id'];
+                $this->user = $userInfo;
                 return true;
             }
             return NULL;
         }
 
-        // public function storeUser($input) {
-        //     $conn = DataRepository::connectDatabase();
-        //     $username = Utils::cleanSQLInput($conn, $input['uname']['value']);
-        //     $password = Utils::cleanSQLInput($conn, $input['pword']['value']);
-        //     $email = Utils::cleanSQLInput($conn, $input['email']['value']);
-        //     $sql = "INSERT INTO users (email, username, password) VALUES ('".$email."','".$username."','".$password."')";
-        //     DataRepository::writeData($conn, $sql);
-        //     mysqli_close($conn);
-        // }
-    
-        // public function updatePassword($pword) {
-        //     $conn = DataRepository::connectDatabase();
-        //     $email = Utils::cleanSQLInput($conn, $_SESSION['email']);
-        //     $password = Utils::cleanSQLInput($conn, $pword);
-        //     $sql = "UPDATE users SET password='".$password."' WHERE email='".$email."'";
-        //     DataRepository::updateData($conn, $sql);
-        //     mysqli_close($conn);
-        // }    
-    
         public function doesEmailExist($email) {
-            $userInfo = self::findUserByEmail($email);
+            $userInfo = $this->crud->findUserByEmail($email);
             return !empty($userInfo);
         }
 
-        public function findUserByEmail($email) {      
-            $conn = DataRepository::connectDatabase();
-            try { 
-                $sql = "SELECT * from users WHERE email = '" . $email . "'";
-                $output = DataRepository::readData($conn, $sql);
-                return empty($output) ? NULL : array_shift($output); 
+        private function emailNotKnown($value) {
+            $exists = User::doesEmailExist($value);
+            if ($exists) {
+                $error = "E-Mail already exists";
             }
-            finally {
-                mysqli_close($conn);        
-            }
+            return $error ?? NULL;
         }
+    
+        private function emailKnown($value) {
+            $exists = User::doesEmailExist($value);
+            if (!$exists) {
+                $error = "E-Mail not known";
+            }
+            return $error ?? NULL;
+        }
+
+
     }
 
 

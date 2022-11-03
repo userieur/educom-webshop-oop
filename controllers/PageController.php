@@ -39,7 +39,7 @@
                     $this->processShop();
                     break;
                 case 'loguit':
-                    $this->model = new UserModel($this->model);
+                    $this->model = new UserModel($this->model, $this->model->crud);
                     $this->model->doLogoutUser();
                     $this->model->page = 'home';
             }
@@ -47,11 +47,13 @@
         }
   
         private function processForm() {
-            $this->model = new FormModel($this->model);
+            $userCrud = new UserCrud($this->model->crud);
+            $this->model = new FormModel($this->model, $userCrud);
 
             $this->model->form = $this->model->getForm($this->model->page);
 
             if (Utils::isPostRequest()) {
+                // validations is een leuk projectje voor straks
                 $this->model->validations = new Validate();
                 $this->model->form = $this->model->validations->validateForm($this->model->form);
 
@@ -61,7 +63,7 @@
                             $this->model->page = 'thanks';
                             break; 
                         case 'registratie':
-                            $this->model->storeUser($this->model->form);
+                            $this->model->crud->storeUser($this->model->form);
                             $this->model->page = 'login';
                             break;
                         case 'login':

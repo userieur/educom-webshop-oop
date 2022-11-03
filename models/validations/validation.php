@@ -65,23 +65,6 @@
             return $error ?? NULL;
         }
     
-        private function emailNotKnown($value) {
-            $exists = User::doesEmailExist($value);
-            if ($exists) {
-                $error = "E-Mail already exists";
-            }
-            return $error ?? NULL;
-        }
-    
-        private function emailKnown($value) {
-            $exists = User::doesEmailExist($value);
-            if (!$exists) {
-                $error = "E-Mail not known";
-            }
-            return $error ?? NULL;
-        }
-    
-
         private function checkForError ($value, $check) {
             $param = $param ?? array();
             $checkArray = explode(":", $check);

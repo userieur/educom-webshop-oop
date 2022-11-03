@@ -1,9 +1,9 @@
 <?php
     class SessionManager {
         function doLoginUser($user) {
-            $_SESSION['user'] = $user['userName'];
-            $_SESSION['userId'] = $user['userId'];
-            $_SESSION['email'] = $user['email'];
+            $_SESSION['user'] = $user->username;
+            $_SESSION['userId'] = $user->id;
+            $_SESSION['email'] = $user->email;
             $_SESSION['cart'] = array();
         }
     

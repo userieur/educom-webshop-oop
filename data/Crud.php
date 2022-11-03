@@ -1,6 +1,5 @@
 <?php
 
-
     class Crud {
         private $pdo;
         private $stmt;
@@ -19,42 +18,38 @@
 
         }
 
-        public function getPDO() {
-            return $this->pdo;
-        }
-
         private function prepareAndBind($sql, $bindParameters) {
+            // var_dump($sql);
+            // var_dump($bindParameters);
             $this->stmt = $this->pdo->prepare($sql);
             foreach ($bindParameters as $key => $value) {
                 $this->stmt->bindValue($key, $value);
             }
-            $this->stmt->setFetchMode(PDO::FETCH_CLASS);
-
-
-            // INSERT/DELETE/UPDATE bovenstaande voldoene
-            // return $pdo -> lastInsertId();
-            
-            // SELECT
-            //icm setFetchMode 
-            // $result = $stmt -> fetch();
-            // $result = $stmt -> fetch_all();
         }
      
         function createRow($sql, $params) {
             $this->prepareAndBind($sql, $params);
+            // var_dump($this->stmt);
             $this->stmt->execute();
             $last_id = $this->pdo->lastInsertId();
             return $last_id;
         }
         
-        function readOneRow($sql, $params) {
-            $stmt = $this->prepareAndBind($sql, $params);
-            $stmt->setFetchMode(PDO::FETCH_CLASS);
+        function readOneRow($sql, $params, $className) {
+            $this->prepareAndBind($sql, $params);
+            $this->stmt->setFetchMode(PDO::FETCH_CLASS, $className);
+            $this->stmt->execute();
+            $result = $this->stmt->fetch();
+            return $result;
         }
 
-        function readMultipleRows($sql, $params) {
-            $stmt = $this->prepareAndBind($sql, $params);
-            $stmt->setFetchMode(PDO::FETCH_CLASS);
+        function readMultipleRows($sql, $params, $className) {
+            $this->prepareAndBind($sql, $params);
+            $this->stmt->setFetchMode(PDO::FETCH_CLASS, $className);
+            $this->stmt->execute();
+            // Stukje over loopen
+            $result = $this->stmt->fetch();
+            return $result;
         }
 
         function updateRow($sql, $params) {

@@ -3,8 +3,9 @@
     class FormModel extends UserModel {
             public $form = [];
 
-            public function __construct($pageModel) {
-                PARENT::__construct($pageModel);
+            public function __construct($pageModel, $crud) {
+                PARENT::__construct($pageModel, $crud);
+                $this->crud = $crud;
             }
 
             public function getForm($page) {

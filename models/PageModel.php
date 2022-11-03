@@ -9,18 +9,18 @@
         protected $isPost = false;
         public $menu;
         public $sessionManager;
-        public $pdo;
+        public $crud;
 
-        public function __construct($copy, $pdo) {
+        public function __construct($copy, $crud) {
             if (empty($copy)) {
                 $this->sessionManager = new SessionManager();
-                $this->pdo = $pdo;
+                $this->crud = $crud;
             } else {
                 $this->page = $copy->page;
                 $this->isPost = $copy->isPost;
                 $this->menu = $copy->menu;
                 $this->sessionManager = $copy->sessionManager;
-                $this->pdo = $copy->pdo;
+                $this->crud = $copy->crud;
             }
         }
 
