@@ -15,6 +15,10 @@
             return $_SESSION['user'];
         }
 
+        function getLoggedInUserId() {
+            return $_SESSION['userId'];
+        }
+
         function getLoggedInUserEmail() {
             return $_SESSION['email'];
         }
@@ -23,6 +27,22 @@
             return $_SESSION['cart'];
         }
     
+        function getCartItemCount($id) {
+            return $_SESSION['cart'][$id] ?? Null;
+        }
+
+        function setCartItemCount($id, $count) {
+            $_SESSION['cart'][$id] = $count;
+        }
+
+        function removeCartItem ($id) {
+            unset($_SESSION['cart'][$id]);
+        }
+
+        function emptyCart() {
+            $_SESSION['cart'] = [];
+        }
+
         function doLogoutUser() {
             session_unset();
         }

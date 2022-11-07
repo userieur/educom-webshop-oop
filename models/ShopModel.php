@@ -1,15 +1,19 @@
 <?php
+    require_once("data/objects/invoice.php");
+    require_once("data/objects/order.php");
 
     class ShopModel extends PageModel {
         public $products = [];
         public $productsClass = NULL;
+        public $order;
 
         public function __construct($pageModel, $crud) {
             PARENT::__construct($pageModel, $crud);
             $this->crud = $crud;
+            $invoice = new Invoice();
+            $this->order = new Order($invoice);
+            $this->handleActions();
             $this->getItems();
-            // $this->products = $items['products'];
-            // $this->productsClass = $items['class'];
         }
 
 
@@ -26,89 +30,54 @@
                     $this->productsClass = "big";
                     break;
                 case 'cart':
-                    $products = $this->getProductsByIdArray($this->sessionManager->getCart());
-                    // var_dump($products);
-                    $this->products = $this->addCartItemCount($products);
-                    $this->productsClass = "cart";
+                    if ($this->sessionManager->getCart())
+                    {
+                        $this->products = $this->getProductsByIdArray($this->sessionManager->getCart());
+                        $this->addCartItemCount();
+                        $this->createInvoiceLines();
+                        $this->productsClass = "cart";
+                    }
                     break;
             }
+            $this->addCartItemCount();
         }
 
         public function handleActions() {
             $id = Utils::getVar('id');
             $action = Utils::getVar("action");
+            $count = $this->sessionManager->getCartItemCount($id) ?? Null;
             switch($action) {
                 case ACTION_ADD_TO_CART:
-                    if (array_key_exists($id, $_SESSION['cart'])) {
-                        $_SESSION['cart'][$id] += 1; 
-                    } else {
-                        $_SESSION['cart'] += [$id => 1];
-                    }
+                    if ($count) {
+                        $count += 1;
+                    } else {$count = 1;}
+                    $this->sessionManager->setCartItemCount($id, $count);
                     break;
                 case ACTION_REMOVE_FROM_CART:
-                    if (!isset($_SESSION['cart'][$id])) {
-                        // do nothing;
-                    } elseif ($_SESSION['cart'][$id] == 1) {
-                        unset($_SESSION['cart'][$id]); 
+                    if ($count && $count == 1) {
+                        $this->sessionManager->removeCartItem($id);
                     } else {
-                        $_SESSION['cart'][$id] -= 1;
+                        $count -= 1;
+                        echo($count);
+                        $this->sessionManager->setCartItemCount($id, $count);
                     }
                     break;
-                    // CASE ITEM WEG => unset
                 case ACTION_ORDER:
-                    if ($_SESSION['cart']) {
+                    if ($this->sessionManager->getCart()) {
+                        $this->products = $this->getProductsByIdArray($this->sessionManager->getCart());
+                        $this->addCartItemCount();
+                        $this->createInvoiceLines();
                         $this->placeOrder();
-                        $_SESSION['cart'] = [];
-                    } else {
-                        echo 'Mandje is leeg G'; 
+                        $this->sessionManager->emptyCart();
+                        $this->products = [];
                     }
                     break;
             }
         }
 
         private function placeOrder() {
-            $date = Utils::currentDate();
-            $conn = DataRepository::connectDatabase();
-            $userId = $_SESSION['userId'];
-            $invoiceLines = [];    
-
-            // Create invoice
-            $sql = "INSERT INTO invoices (invoice_num) VALUES ('".$date.'0000'."')";
-            $output = DataRepository::writeData($conn, $sql);
-    
-            $sql = "SELECT invoice_num from invoices ORDER BY invoice_num DESC LIMIT 1";
-            $output = DataRepository::readData($conn, $sql);
-            
-            $invoiceNum = intval($output) + 1;
-                
-            $sql = "UPDATE invoices SET user_id='".$userId."', invoice_num='".$invoiceNum."') WHERE invoice_num='".$date.'0000'."')";
-            DataRepository::updateData($conn, $sql);
-            
-            // Retrieve invoice ID number of created invoice from database
-            $sql = "SELECT id from invoices WHERE invoice_num='".$invoiceNum."'";
-            $output = DataRepository::readData($conn, $sql);
-            
-            $invoiceId = array_shift($output);
-    
-            // Create SQL-strings for each invoice-line and insert them in invoice_lines database
-            foreach ($invoiceLines as $line) {
-                $columnString = "invoice_id, ";
-                $valueString = "'".$invoiceId."', ";
-                $count = 0;
-                foreach ($line as $column => $value) {
-                    if ((count($line)-$count) > 1) {
-                        $columnString.=$column.", ";
-                        $valueString.="'".$value."', ";
-                        $count += 1;
-                    } else {
-                        $columnString.=$column;
-                        $valueString.="'".$value."'";
-                    }
-                }
-                $sql = "INSERT INTO invoice_lines (".$columnString.") VALUES (".$valueString.")";
-                DataRepository::writeData($conn, $sql);
-            }
-            mysqli_close($conn);
+            $this->order = $this->crud->createOrder($this->order);
+            var_dump($this->order);
         }
 
         private function getAllProducts() {
@@ -124,14 +93,21 @@
             return $this->crud->readProductWithId($id);
         }
 
-        private function addCartItemCount ($productArray) {
-            $output = $productArray;
-            // var_dump($output);
-            // var_dump($this->sessionManager->getCart());
+        private function addCartItemCount () {
             foreach($this->sessionManager->getCart() as $id => $count) {
-                $output[$id]->count=$count;
+                $this->products[$id]->count = $count;
             }
-            return $output;
+        }
+
+        private function createInvoiceLines () {
+            $this->order->invoice->setUserId($this->sessionManager->getLoggedInUserId());
+            foreach($this->products as $id => $info) {
+                $invoiceline = new InvoiceLine();
+                $invoiceline->setArticleId($info->id);
+                $invoiceline->setSalesAmount($info->count);
+                $invoiceline->setSalesPrice($info->price);
+                $this->order->addInvoiceLine($invoiceline, $info->id);
+            }
         }
 
     }
