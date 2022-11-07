@@ -1,11 +1,5 @@
 <?php
-    require_once("./models/PageModel.php");
-    require_once("./models/UserModel.php");
-    require_once("./models/FormModel.php");
-    require_once("./models/ShopModel.php");
-    require_once("constants.php");
-    require_once("utils.php");
-    require_once("./models/validations/validation.php");
+    require_once("references.php");
       
     class PageController {
         
@@ -48,23 +42,22 @@
   
         private function processForm() {
             $userCrud = new UserCrud($this->model->crud);
-            $this->model = new FormModel($this->model, $userCrud);
-
-            $this->model->form = $this->model->getForm($this->model->page);
+            $this->model = new UserModel($this->model, $userCrud); //also creates form at -> form
 
             if (Utils::isPostRequest()) {
-                // validations is een leuk projectje voor straks
-                $this->model->validations = new Validate();
-                $this->model->form = $this->model->validations->validateForm($this->model->form);
-
-                if ($this->model->form['validForm']) {
+                $this->model->form->validate();
+                if ($this->model->form->getValidForm()) {
                     switch ($this->model->page) {
                         case 'contact':
                             $this->model->page = 'thanks';
                             break; 
                         case 'registratie':
-                            $this->model->crud->storeUser($this->model->form);
-                            $this->model->page = 'login';
+                            var_dump($this->model->doesEmailExist());
+                            if (!$this->model->doesEmailExist()) {
+                                $this->model->storeUser();
+                                $this->model->page = 'login';
+                                $this->model->getForm();
+                            }
                             break;
                         case 'login':
                             if ($this->model->authenticateUser()) {
@@ -73,7 +66,7 @@
                             }
                             break;
                         case 'userpage':
-                                $this->model->pdo->updatePassword($this->model->form['pword']['value']);
+                                $this->model->updateUserPassword();
                                 $this->model->page = 'updated';
                             break;
                     }
@@ -82,7 +75,8 @@
         }
 
         private function processShop() {
-            $this->model = new ShopModel($this->model);
+            $shopCrud = new ShopCrud($this->model->crud);
+            $this->model = new ShopModel($this->model, $shopCrud);
             $this->model->handleActions();
         }
 

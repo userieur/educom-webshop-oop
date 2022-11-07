@@ -14,11 +14,11 @@
             <div class="container">';
             foreach($items as $productId => $info) {
                 $id = $productId;
-                $name = $info['name'];
-                $imageurl = $info['imageurl'];
-                $price = $info['price'];
-                $description = $info['description'];
-                $countstring = isset($info['count']) ? '<p class="count">Items '.$info['count'].'</p>' : "";
+                $name = $info->name;
+                $imageurl = $info->imageurl;
+                $price = $info->price;
+                $description = $info->description;
+                $countstring = isset($info->count) ? '<p class="count">Items '.$info->count.'</p>' : "";
                 echo '
                 <div class="webshop">
                     <img class="'.$class.'"src="public/images/'.$imageurl.'" alt="'.$name.'">
@@ -34,8 +34,8 @@
                 }
                 echo '</div>';
             }
-            if ($this->model->page == 'cart') {
-                $this->addActionForm(ACTION_ORDER, $this->model->page, $name, $id);
+            if ($this->model->page == 'cart' && $this->model->sessionManager->getCart()) {
+                $this->addActionForm(ACTION_ORDER, $this->model->page);
             }
             echo '</div>';
         }

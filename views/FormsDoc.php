@@ -18,7 +18,7 @@
         private function showFormStart() {
             echo '
             <form method="POST" action="index.php">
-                <div class="'.$this->model->form['css']. '">
+                <div class="'.$this->model->form->getCss(). '">
                 <input type="hidden" id="page" name="page" value="'.$this->model->page.'">';
         }
 
@@ -26,28 +26,24 @@
 
         }
 
-        private function showFormItems() {
-            foreach($this->model->form as $key => $items){
-                switch($key) {
-                    case 'validForm':
-                    case 'css':
-                        break;
-                    default:
-                        $this->showFormItem($key, $items);
-                        break;
-                }
-            }   
+        private function showFormItems() 
+        {
+            foreach($this->model->form->getFormFields() as $key => $FormField)
+            {
+                $this->showFormItem($key, $FormField);
+            }
+        }   
+        
+
+        private function showFormItem($key, $FormField) {
+            $this->createLabel($key, $FormField);
+            $this->createInputField($key, $FormField);
+            $this->createSpan($FormField);
         }
 
-        private function showFormItem($key, $items) {
-            $this->createLabel($key, $items);
-            $this->createInputField($key, $items);
-            $this->createSpan($items);
-        }
-
-        private function createLabel($key, $items) {
-            $type = $items['type'];
-            $label = $items['label'];
+        private function createLabel($key, $FormField) {
+            $type = $FormField->getType();
+            $label = $FormField->getLabel();
             switch ($type) {
                 case 'text':
                 case 'email':
@@ -88,12 +84,12 @@
             return (($value == $itemtext) ? "checked" : "");
         }
 
-        private function createInputField($key, $items) {
-            $type = $items['type'];
-            $label = $items['label'];
-            $placeholder = $items['placeholder'] ?? "";
-            $options = $items['options'] ?? "";
-            $value = $items['value'] ?? "";
+        private function createInputField($key, $FormField) {
+            $type = $FormField->getType();
+            $label = $FormField->getLabel();
+            $placeholder = $FormField->getPlaceholder() ?? "";
+            $options = $FormField->getOptions() ?? "";
+            $value = $FormField->getValue() ?? "";
             switch ($type) {
                 case 'text':
                 case 'email':
@@ -133,8 +129,8 @@
             }
         }
 
-        private function createSpan($items) {
-            $error = $items['error'] ?? "";
+        private function createSpan($FormField) {
+            $error = $FormField->getError() ?? "";
             echo '
                     <span class="error">'.$error.'</span><br>'.PHP_EOL;
         }

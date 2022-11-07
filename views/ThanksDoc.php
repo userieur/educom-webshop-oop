@@ -19,18 +19,11 @@
         }
 
         function showThankYou() {
-            foreach($this->model->form as $key => $item) {
-                switch ($key) {
-                    case 'css':
-                    case 'validForm':
-                        break;
-                    default:
-                        $value = $item['value'];
-                        $label = $item['label'];
-                        echo '<p>' . $label . '</p><br>' . $value;
-                        echo '</div>';
-                        break;
-                }
+            foreach($this->model->form->formFields as $key => $formItem) {
+                $value = $formItem->getValue();
+                $label = $formItem->getLabel();
+                echo '<p>' . $label . '</p><br>' . $value;
+                echo '</div>';
             }
         }
     }

@@ -12,48 +12,48 @@
             $this->noErrors = true;
         }
 
-        private function validName($value) {
-            if (empty($value)) {
-                $error = "Name is required";
-            } elseif (!preg_match("/^[a-zA-Z-' ]*$/",$value)) {
-                $error = "Only letters and white space allowed"; 
-            }
-            return $error ?? NULL;
-        }
+        // private function validName($value) {
+        //     if (empty($value)) {
+        //         $error = "Name is required";
+        //     } elseif (!preg_match("/^[a-zA-Z-' ]*$/",$value)) {
+        //         $error = "Only letters and white space allowed"; 
+        //     }
+        //     return $error ?? NULL;
+        // }
     
-        private function validEmail($value) {
-            if (empty($value)) {
-                $error = "E-mail address is required";
-            } elseif (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                $error = "Please enter a correct e-mail address";
-            }
-            return $error ?? NULL;
-        }
+        // private function validEmail($value) {
+        //     if (empty($value)) {
+        //         $error = "E-mail address is required";
+        //     } elseif (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+        //         $error = "Please enter a correct e-mail address";
+        //     }
+        //     return $error ?? NULL;
+        // }
     
-        private function validPhone($value) {
-            if (empty($value)) {
-                $error = "Phone is required";
-            } elseif (!is_numeric($value)) {
-                $error = "Please enter a correct phone number";
-            }
-            return $error ?? NULL;
-        }
+        // private function validPhone($value) {
+        //     if (empty($value)) {
+        //         $error = "Phone is required";
+        //     } elseif (!is_numeric($value)) {
+        //         $error = "Please enter a correct phone number";
+        //     }
+        //     return $error ?? NULL;
+        // }
     
-        private function validComment($value) {
-            if (empty($value)) {
-                $error = "Please enter reasons";
-            }
-            return $error ?? NULL;
-        }
+        // private function validComment($value) {
+        //     if (empty($value)) {
+        //         $error = "Please enter reasons";
+        //     }
+        //     return $error ?? NULL;
+        // }
     
-        private function validPassword($value) {
-            if (empty($value)) {
-                $error = "Please enter password";
-            } elseif (!preg_match("/^[a-zA-Z-' ]*$/",$value)) {
-                $error = "Only letters and white space allowed"; 
-            }
-            return $error ?? NULL;
-        }
+        // private function validPassword($value) {
+        //     if (empty($value)) {
+        //         $error = "Please enter password";
+        //     } elseif (!preg_match("/^[a-zA-Z-' ]*$/",$value)) {
+        //         $error = "Only letters and white space allowed"; 
+        //     }
+        //     return $error ?? NULL;
+        // }
     
         private function equalTo($value, $functionVar="") {
             $comparable = Utils::cleanInput($_POST[$functionVar]);

@@ -119,3 +119,48 @@ echo '
                     <p>Reden van contact:</p><br>' . $story['value'] . '
                 </div>
             ';
+
+//==============================================================================
+    protected function _showLabel() : string
+    {
+        return '<label for="'.$this->info->name.'">'.$this->info->label.'</label>'.PHP_EOL;
+    }
+//==============================================================================
+    protected function _getDefAttribs() : string
+    {
+        return ' id="'.$this->id.'"'
+             . ' name="'.$this->info->name.'"'
+             . ' class="'.$this->css_classes.'"'   
+//TO DO
+             . ($this->info->required ? ' required="required" ' : '')   
+             . ($this->readonly ? ' readonly="readonly" ' : '');   
+    }
+//==============================================================================
+    abstract protected function _showField() : string;
+   
+//==============================================================================
+    protected function _showErrorMsg() : string
+    {
+        return '<span class="error">'.$this->error_msg.'</span>'.PHP_EOL;
+    }
+//==============================================================================
+
+}
+//==============================================================================
+    public function show(bool $direct_output=true) : string
+    {
+        $ret = $this->_showLabel()
+             . $this->_showField();
+        if ($this->error_msg) $ret.= $this->_showErrorMsg();
+        if ($direct_output)
+        {
+            echo $ret;
+            return "";
+        }    
+        else 
+        {
+            return $ret;
+        }
+    }
+
+

@@ -9,7 +9,7 @@
     define("VALIDATE_EMAIL", "validEmail");
     define("VALIDATE_PHONE", "validPhone");
     define("VALIDATE_PASSWORD", "validPassword");
-    define("VALIDATE_PASSWORD_EQUAL_ENTRY", "equalTo:pword");
+    define("VALIDATE_PASSWORD_EQUAL_ENTRY", "pword");
 
     //User validations
     define("USER_AUTHENTICATE", "authenticateUser");

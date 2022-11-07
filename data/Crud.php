@@ -19,8 +19,6 @@
         }
 
         private function prepareAndBind($sql, $bindParameters) {
-            // var_dump($sql);
-            // var_dump($bindParameters);
             $this->stmt = $this->pdo->prepare($sql);
             foreach ($bindParameters as $key => $value) {
                 $this->stmt->bindValue($key, $value);
@@ -29,7 +27,6 @@
      
         function createRow($sql, $params) {
             $this->prepareAndBind($sql, $params);
-            // var_dump($this->stmt);
             $this->stmt->execute();
             $last_id = $this->pdo->lastInsertId();
             return $last_id;
@@ -47,14 +44,20 @@
             $this->prepareAndBind($sql, $params);
             $this->stmt->setFetchMode(PDO::FETCH_CLASS, $className);
             $this->stmt->execute();
-            // Stukje over loopen
-            $result = $this->stmt->fetch();
+            var_dump($this->stmt);
+            $rows = $this->stmt->fetchAll();
+            $result = [];
+            foreach ($rows as $row)
+            {
+                $result[$row->id] = $row;
+                var_dump($row);
+            }
             return $result;
         }
 
         function updateRow($sql, $params) {
-            $stmt = $this->prepareAndBind($sql, $params);
-            $stmt->execute();
+            $this->prepareAndBind($sql, $params);
+            $this->stmt->execute();
         }
 
         function deleteRow($sql, $params) {
