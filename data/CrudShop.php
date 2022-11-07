@@ -51,6 +51,7 @@
                                 'sales_amount'   => $invoiceline->getSalesAmount(),
                                 'sales_price'    => $invoiceline->getSalesPrice());
                 $returned = $this->crud->createRow($sql, $params);
+                
                 // Update order with full invoicelines, so returned order is complete.
                 $order->invoiceLines[$key]->setId($returned);
                 $order->invoiceLines[$key]->setInvoiceId($order->invoice->getId());
