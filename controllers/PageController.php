@@ -52,7 +52,6 @@
                             $this->model->page = 'thanks';
                             break; 
                         case 'registratie':
-                            var_dump($this->model->doesEmailExist());
                             if (!$this->model->doesEmailExist()) {
                                 $this->model->storeUser();
                                 $this->model->page = 'login';
@@ -77,7 +76,6 @@
         private function processShop() {
             $shopCrud = new ShopCrud($this->model->crud);
             $this->model = new ShopModel($this->model, $shopCrud);
-            // $this->model->handleActions();
         }
 
         private function buildMenu() {
